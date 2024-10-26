@@ -1,0 +1,3 @@
+﻿  main.cpp
+D:\MicrosoftStudioProjects\SCARA_ROBOT\robot\robot\main.cpp(4,1): warning C4326: return type of 'main' should be 'int' instead of 'void'
+  robot.vcxproj -> D:\MicrosoftStudioProjects\SCARA_ROBOT\robot\x64\Debug\robot.exe
