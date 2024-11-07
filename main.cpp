@@ -1,6 +1,7 @@
 ﻿#include <iostream> 
 #include <cmath> 
 
+
 void MoveFromStartToObject(double L1, double L2, double x, double y, double& theta1, double& theta2)//------передача в функцию аргументов
 {
 	double r = sqrt(x * x + y * y); //--------r диагональ. Рассчитывается по теореме Пифагора
