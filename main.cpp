@@ -1,8 +1,10 @@
 ﻿#include <iostream> 
 #include <cmath> 
 
+const double L1 = 10;
+const double L2 = 20;
 
-void MoveFromStartToObject(double L1, double L2, double x, double y, double& theta1, double& theta2)//------передача в функцию аргументов
+void MoveFromStartToBoltFeeder(double x, double y, double& theta1, double& theta2)//------передача в функцию аргументов
 {
 	double r = sqrt(x * x + y * y); //--------r диагональ. Рассчитывается по теореме Пифагора
 
@@ -36,22 +38,32 @@ void MoveFromStartToObject(double L1, double L2, double x, double y, double& the
 	}
 }
 
+void FromBoltFeederToObject(double x, double y, double& theta1, double& theta2)
+{
+
+}
+
+int AngleToSteps(double angle)//---------------------функция для перевода углов в шаги двигателя
+{
+	const int StepsPerRevolution = 200;//--------константа шагов за полный оборот двигателя
+	return (int)(angle / 360.0 * StepsPerRevolution);
+}
+
 int main()
 {
 	double L1, L2, x, y, theta1, theta2; //---------инициализация переменных
 
-	std::cout << "Enter L1, L2: " << std::endl; //-------ввод длин звеньев манипулятора
-	std::cin >> L1;
-	std::cin >> L2;
+	//std::cout << "Enter L1, L2: " << std::endl; //-------ввод длин звеньев манипулятора
+	//std::cin >> L1;
+	//std::cin >> L2;
 
 	std::cout << "Enter x, y: " << std::endl; //-------ввод координат
 	std::cin >> x;
 	std::cin >> y;
 
-	MoveFromStartToObject(L1, L2, x, y, theta1, theta2); //-------вызов функции
+	MoveFromStartToBoltFeeder(x, y, theta1, theta2); //-------вызов функции
 
 	std::cout << "Angle Theta1:\t" << theta1 << std::endl; //--------вывод полученных значений углов
 	std::cout << "Angle Theta2:\t" << theta2 << std::endl;
 	return 0;
 }
-

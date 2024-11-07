@@ -1,2 +1,4 @@
 ﻿  main.cpp
+D:\MicrosoftStudioProjects\SCARA_ROBOT\robot\robot\main.cpp(47,13): warning C4101: 'L2': unreferenced local variable
+D:\MicrosoftStudioProjects\SCARA_ROBOT\robot\robot\main.cpp(47,9): warning C4101: 'L1': unreferenced local variable
   robot.vcxproj -> D:\MicrosoftStudioProjects\SCARA_ROBOT\robot\x64\Debug\robot.exe
