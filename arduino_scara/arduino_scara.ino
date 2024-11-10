@@ -33,7 +33,7 @@ void MoveFromStartToBoltFeeder(double x, double y, double& theta1, double& theta
   }
 
   else {
-    double cosTheta2 = cos(L1 * L1 + L2 * L2 - r * r / 2 * L1 * L2);  //--------расчет косинуса угла№ 2
+    double cosTheta2 = cos((L1 * L1 + L2 * L2 - r * r) / (2 * L1 * L2));  //--------расчет косинуса угла№ 2
 
     if (cosTheta2 < -1 || cosTheta2 > 1)  //-------проверка на значение косинуса. В случае другого значения косинуса, не входящего в диапозон -1 до 1, значения улов станут 0
     {
@@ -64,7 +64,7 @@ void MoveFromBoltFeederToObject(double obj_x, double obj_y, double& new_theta1, 
   }
 
   else {
-    double new_cosTheta2 = cos(L1 * L1 + L2 * L2 - r * r / 2 * L1 * L2);
+    double new_cosTheta2 = cos((L1 * L1 + L2 * L2 - r * r) / (2 * L1 * L2));
 
     if (new_cosTheta2 < -1 || new_cosTheta2 > 1) {
       new_theta1 = new_theta2 = 0;
