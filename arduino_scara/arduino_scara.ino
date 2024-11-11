@@ -14,7 +14,7 @@ const double L1 = 245;  //-----------------передаю константные
 const double L2 = 234526;
 
 //-----------------------------------------ФУНКЦИЯ ОПРЕДЕЛЕНИЯ УГЛОВ
-void MoveFromStartToBoltFeeder(double x, double y, double& theta1, double& theta2)  //------передача в функцию аргументов
+void FromStartToBoltFeederAngle(double x, double y, double& theta1, double& theta2)  //------передача в функцию аргументов
 {
   double r = sqrt(x * x + y * y);  //--------r диагональ. Рассчитывается по теореме Пифагора
 
@@ -33,7 +33,7 @@ void MoveFromStartToBoltFeeder(double x, double y, double& theta1, double& theta
   }
 
   else {
-    double cosTheta2 = cos(L1 * L1 + L2 * L2 - r * r / 2 * L1 * L2);  //--------расчет косинуса угла№ 2
+    double cosTheta2 = cos((L1 * L1 + L2 * L2 - r * r) / (2 * L1 * L2));  //--------расчет косинуса угла№ 2
 
     if (cosTheta2 < -1 || cosTheta2 > 1)  //-------проверка на значение косинуса. В случае другого значения косинуса, не входящего в диапозон -1 до 1, значения улов станут 0
     {
@@ -50,7 +50,7 @@ void MoveFromStartToBoltFeeder(double x, double y, double& theta1, double& theta
   }
 }
 
-void MoveFromBoltFeederToObject(double obj_x, double obj_y, double& new_theta1, double& new_theta2) {
+void FromBoltFeederToObjectAngle(double obj_x, double obj_y, double& new_theta1, double& new_theta2) {
   double r = sqrt(obj_x * obj_x + obj_y * obj_y);
 
   if (r > L1 + L2) {
@@ -64,7 +64,7 @@ void MoveFromBoltFeederToObject(double obj_x, double obj_y, double& new_theta1, 
   }
 
   else {
-    double new_cosTheta2 = cos(L1 * L1 + L2 * L2 - r * r / 2 * L1 * L2);
+    double new_cosTheta2 = cos((L1 * L1 + L2 * L2 - r * r) / (2 * L1 * L2));
 
     if (new_cosTheta2 < -1 || new_cosTheta2 > 1) {
       new_theta1 = new_theta2 = 0;
@@ -80,6 +80,69 @@ int AngleToSteps(double angle)  //---------------------функция для п�
 {
   const int StepsPerRevolution = 200;  //--------константа шагов за полный оборот двигателя
   return (int)(angle / 360.0 * StepsPerRevolution);
+}
+
+void MoveFromStartToBoltFeeder(double steps_1, double steps_2) 
+{
+  stepper1.moveTo(steps_1);         //---------устанавливаем целевую позицию (до конвейера)
+  stepper2.moveTo(steps_2);
+  while (stepper1.distanceToGo() != 0 || stepper2.distanceToGo() != 0) 
+  {
+    stepper1.run();  //----------------пока шаги мотора не равны 0 то выполняется движение
+    stepper2.run();
+  }
+
+  digitalWrite(ENABLE_PIN_1, HIGH);  //----------после цикла движения выключаем первый мотор
+  digitalWrite(ENABLE_PIN_2, HIGH);  //----------после цикла движения выключаем второй мотор
+}
+
+void MoveFromBoltFeederToObject(double sum_theta1, double sum_theta2) 
+{
+  digitalWrite(ENABLE_PIN_1, LOW);  //---------включаем первый мотор
+  digitalWrite(ENABLE_PIN_2, LOW);  //---------включаем второй мотор
+
+  stepper1.moveTo(sum_theta1);         //---------устанавливаем целевую позицию (от конвейера до детали)
+  stepper2.moveTo(sum_theta2);
+  while (stepper1.distanceToGo() != 0 || stepper2.distanceToGo() != 0) 
+  {
+    stepper1.run();  //----------------пока шаги мотора не равны 0 то выполняется движение
+    stepper2.run();
+  }
+
+  digitalWrite(ENABLE_PIN_1, HIGH);  //----------после цикла движения выключаем первый мотор
+  digitalWrite(ENABLE_PIN_2, HIGH);  //----------после цикла движения выключаем второй мотор
+}
+
+void MoveFromObjectToBoltFeeder(double sum_theta1, double sum_theta2) 
+{
+  digitalWrite(ENABLE_PIN_1, LOW);  //---------включаем первый мотор
+  digitalWrite(ENABLE_PIN_2, LOW);
+
+  stepper1.moveTo(-sum_theta1);         //---------устанавливаем целевую позицию (от детали до конвейера)
+  stepper2.moveTo(-sum_theta2);
+  while (stepper1.distanceToGo() != 0 || stepper2.distanceToGo() != 0) 
+  {
+    stepper1.run();  //----------------пока шаги мотора не равны 0 то выполняется движение
+    stepper2.run();
+  }
+
+  digitalWrite(ENABLE_PIN_1, HIGH);  //----------после цикла движения выключаем первый мотор
+  digitalWrite(ENABLE_PIN_2, HIGH);  //----------после цикла движения выключаем второй мотор
+}
+
+void Lowering()
+{
+  //------------------------ФУНКЦИЯ ОПУСКАНИЯ
+}
+
+void Twisting()
+{
+  //------------------------ФУНКЦИЯ ЗАКРУЧИВАНИЯ
+}
+
+void Lifting()
+{
+  //------------------------ФУНКЦИЯ ПОДЪЕМА
 }
 
 void setup() {
@@ -98,8 +161,8 @@ void loop() {
   double point_X = 25, point_Y = 15, obj_x = 23, obj_y = 31;  //-------УСТАНОВИТЬ ЗНАЧЕНИЯ КООРДИНАТ!!!
   double theta1, theta2, new_theta1, new_theta2;
 
-  MoveFromStartToBoltFeeder(point_X, point_Y, theta1, theta2);       //----------вызов функции расчета углов для движения к конвейеру подачи болтов
-  MoveFromBoltFeederToObject(obj_x, obj_y, new_theta1, new_theta2);  //----------вызов функции расчета углов для движения к объекту(заготовка)
+  FromStartToBoltFeederAngle(point_X, point_Y, theta1, theta2);       //----------вызов функции расчета углов для движения к конвейеру подачи болтов
+  FromBoltFeederToObjectAngle(obj_x, obj_y, new_theta1, new_theta2);  //----------вызов функции расчета углов для движения к объекту(заготовка)
 
   Serial.print("Theta1: ");  //--------вывод значений
   Serial.print(theta1);
@@ -122,61 +185,15 @@ void loop() {
   int sum_theta1 = steps_1 + new_steps_1;  //---------общий угол для движения от конвейера к объекту(заготовка)
   int sum_theta2 = steps_2 + new_steps_2;
 
-
-  stepper1.moveTo(steps_1);         //---------устанавливаем целевую позицию (до конвейера)
-  stepper2.moveTo(steps_2);
-  while (stepper1.distanceToGo() != 0 || stepper2.distanceToGo() != 0) 
+  for (int i = 0; i < 10; i++)
   {
-    stepper1.run();  //----------------пока шаги мотора не равны 0 то выполняется движение
-    stepper2.run();
+    MoveFromStartToBoltFeeder(steps_1, steps_2);
+    MoveFromBoltFeederToObject(sum_theta1, sum_theta2);
+    MoveFromObjectToBoltFeeder(sum_theta1, sum_theta2);
+    Lowering();
+    Twisting();
+    Lifting();
   }
-
-  digitalWrite(ENABLE_PIN_1, HIGH);  //----------после цикла движения выключаем первый мотор
-  digitalWrite(ENABLE_PIN_2, HIGH);  //----------после цикла движения выключаем второй мотор
-
-  /*
-  ----
-  ----
-  -----------КОД ОПУСКАНИЯ, ВЗЯТИЯ БОЛТА, ПОДЪЕМА
-  ----
-  ----
-  */
-
-  digitalWrite(ENABLE_PIN_1, LOW);  //---------включаем первый мотор
-  digitalWrite(ENABLE_PIN_2, LOW);  //---------включаем второй мотор
-
-  stepper1.moveTo(sum_theta1);         //---------устанавливаем целевую позицию (от конвейера до детали)
-  stepper2.moveTo(sum_theta2);
-  while (stepper1.distanceToGo() != 0 || stepper2.distanceToGo() != 0) 
-  {
-    stepper1.run();  //----------------пока шаги мотора не равны 0 то выполняется движение
-    stepper2.run();
-  }
-
-  digitalWrite(ENABLE_PIN_1, HIGH);  //----------после цикла движения выключаем первый мотор
-  digitalWrite(ENABLE_PIN_2, HIGH);  //----------после цикла движения выключаем второй мотор
-
-  /*
-  ----
-  ----
-  -----------КОД ОПУСКАНИЯ, ОТПУСКАНИЯ БОЛТА, ПОДЪЕМА
-  ----
-  ----
-  */
-
-  digitalWrite(ENABLE_PIN_1, LOW);  //---------включаем первый мотор
-  digitalWrite(ENABLE_PIN_2, LOW);
-
-  stepper1.moveTo(-sum_theta1);         //---------устанавливаем целевую позицию (от детали до конвейера)
-  stepper2.moveTo(-sum_theta2);
-  while (stepper1.distanceToGo() != 0 || stepper2.distanceToGo() != 0) 
-  {
-    stepper1.run();  //----------------пока шаги мотора не равны 0 то выполняется движение
-    stepper2.run();
-  }
-
-  digitalWrite(ENABLE_PIN_1, HIGH);  //----------после цикла движения выключаем первый мотор
-  digitalWrite(ENABLE_PIN_2, HIGH);  //----------после цикла движения выключаем второй мотор
 
   delay(1000);  //-------задержка между циклами
 }
