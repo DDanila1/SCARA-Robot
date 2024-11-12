@@ -133,6 +133,7 @@ void MoveFromObjectToBoltFeeder(double sum_theta1, double sum_theta2)
 void Lowering()
 {
   //------------------------ФУНКЦИЯ ОПУСКАНИЯ
+  digital
 }
 
 void Twisting()
